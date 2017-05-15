@@ -17,29 +17,41 @@ import java.util.Map;
 class FieldParser {
 
     public static Pair<String, byte[]> parsePrimitiveField(Field field, Object value) {
-        if ( value == null) {
+        if (value == null) {
             return new Pair<>(new HBaseQualifier(field.name(), field.schema().type()).build(), null);
         }
-        Preconditions.checkArgument(field.schema().type().isPrimitive());
+        // Preconditions.checkArgument(field.schema().type().isPrimitive());
         switch (field.schema().type()) {
             case INT8:
-                return new Pair<>(new HBaseQualifier(field.name(), field.schema().type()).build(), Bytes.toBytes((Short) value));
+                return new Pair<>(new HBaseQualifier(field.name(), field.schema().type()).build(),
+                        Bytes.toBytes((Short) value));
             case INT16:
-                return new Pair<>(new HBaseQualifier(field.name(), field.schema().type()).build(), Bytes.toBytes((Short) value));
+                return new Pair<>(new HBaseQualifier(field.name(), field.schema().type()).build(),
+                        Bytes.toBytes((Short) value));
             case INT32:
-                return new Pair<>(new HBaseQualifier(field.name(), field.schema().type()).build(), Bytes.toBytes((Integer) value));
+                return new Pair<>(new HBaseQualifier(field.name(), field.schema().type()).build(),
+                        Bytes.toBytes((Integer) value));
             case INT64:
-                return new Pair<>(new HBaseQualifier(field.name(), field.schema().type()).build(), Bytes.toBytes((Long) value));
+                return new Pair<>(new HBaseQualifier(field.name(), field.schema().type()).build(),
+                        Bytes.toBytes((Long) value));
             case FLOAT32:
-                return new Pair<>(new HBaseQualifier(field.name(), field.schema().type()).build(), Bytes.toBytes((Float) value));
+                return new Pair<>(new HBaseQualifier(field.name(), field.schema().type()).build(),
+                        Bytes.toBytes((Float) value));
             case FLOAT64:
-                return new Pair<>(new HBaseQualifier(field.name(), field.schema().type()).build(), Bytes.toBytes((Double) value));
+                return new Pair<>(new HBaseQualifier(field.name(), field.schema().type()).build(),
+                        Bytes.toBytes((Double) value));
             case BOOLEAN:
-                return new Pair<>(new HBaseQualifier(field.name(), field.schema().type()).build(), Bytes.toBytes((Boolean) value));
+                return new Pair<>(new HBaseQualifier(field.name(), field.schema().type()).build(),
+                        Bytes.toBytes((Boolean) value));
             case STRING:
-                return new Pair<>(new HBaseQualifier(field.name(), field.schema().type()).build(), Bytes.toBytes((String) value));
+                return new Pair<>(new HBaseQualifier(field.name(), field.schema().type()).build(),
+                        Bytes.toBytes((String) value));
             case BYTES:
-                return new Pair<>(new HBaseQualifier(field.name(), field.schema().type()).build(), (byte[]) value);
+                return new Pair<>(new HBaseQualifier(field.name(), field.schema().type()).build(),
+                        (byte[]) value);
+            case STRUCT:
+                return new Pair<>(new HBaseQualifier(field.name(), field.schema().type()).build(),
+                        Bytes.toBytes(value.toString()));
             default:
                 return null;
 

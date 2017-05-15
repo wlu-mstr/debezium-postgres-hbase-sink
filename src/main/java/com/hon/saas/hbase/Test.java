@@ -23,7 +23,7 @@ public class Test {
         props.put("schemas.enable", Boolean.TRUE.toString());
 
         //////
-        String value = "{\"schema\":{\"type\":\"struct\",\"fields\":[{\"type\":\"struct\",\"fields\":[{\"type\":\"string\",\"optional\":false,\"field\":\"name\"},{\"type\":\"int32\",\"optional\":true,\"name\":\"io.debezium.time.Date\",\"version\":1,\"field\":\"signup_date\"}],\"optional\":true,\"name\":\"exampledb.public.user_tbl.Value\",\"field\":\"before\"},{\"type\":\"struct\",\"fields\":[{\"type\":\"string\",\"optional\":false,\"field\":\"name\"},{\"type\":\"int32\",\"optional\":true,\"name\":\"io.debezium.time.Date\",\"version\":1,\"field\":\"signup_date\"}],\"optional\":true,\"name\":\"exampledb.public.user_tbl.Value\",\"field\":\"after\"},{\"type\":\"struct\",\"fields\":[{\"type\":\"string\",\"optional\":false,\"field\":\"name\"},{\"type\":\"int64\",\"optional\":true,\"field\":\"ts_usec\"},{\"type\":\"int32\",\"optional\":true,\"field\":\"txId\"},{\"type\":\"int64\",\"optional\":true,\"field\":\"lsn\"},{\"type\":\"boolean\",\"optional\":true,\"field\":\"snapshot\"},{\"type\":\"boolean\",\"optional\":true,\"field\":\"last_snapshot_record\"}],\"optional\":false,\"name\":\"io.debezium.connector.postgresql.Source\",\"field\":\"source\"},{\"type\":\"string\",\"optional\":false,\"field\":\"op\"},{\"type\":\"int64\",\"optional\":true,\"field\":\"ts_ms\"}],\"optional\":false,\"name\":\"exampledb.public.user_tbl.Envelope\",\"version\":1},\"payload\":{\"before\":{\"name\":\"WeiLu0511_1\",\"signup_date\":null},\"after\":null,\"source\":{\"name\":\"exampledb\",\"ts_usec\":1494489067645992,\"txId\":1887,\"lsn\":24836969,\"snapshot\":null,\"last_snapshot_record\":null},\"op\":\"d\",\"ts_ms\":1494489067674}}";
+        String value = "{\"schema\":{\"type\":\"struct\",\"fields\":[{\"type\":\"struct\",\"fields\":[{\"type\":\"string\",\"optional\":false,\"field\":\"name\"},{\"type\":\"int32\",\"optional\":true,\"name\":\"io.debezium.time.Date\",\"version\":1,\"field\":\"signup_date\"}],\"optional\":true,\"name\":\"exampledb.public.user_tbl.Value\",\"field\":\"before\"},{\"type\":\"struct\",\"fields\":[{\"type\":\"string\",\"optional\":false,\"field\":\"name\"},{\"type\":\"int32\",\"optional\":true,\"name\":\"io.debezium.time.Date\",\"version\":1,\"field\":\"signup_date\"}],\"optional\":true,\"name\":\"exampledb.public.user_tbl.Value\",\"field\":\"after\"},{\"type\":\"struct\",\"fields\":[{\"type\":\"string\",\"optional\":false,\"field\":\"name\"},{\"type\":\"int64\",\"optional\":true,\"field\":\"ts_usec\"},{\"type\":\"int32\",\"optional\":true,\"field\":\"txId\"},{\"type\":\"int64\",\"optional\":true,\"field\":\"lsn\"},{\"type\":\"boolean\",\"optional\":true,\"field\":\"snapshot\"},{\"type\":\"boolean\",\"optional\":true,\"field\":\"last_snapshot_record\"}],\"optional\":false,\"name\":\"io.debezium.connector.postgresql.Source\",\"field\":\"source\"},{\"type\":\"string\",\"optional\":false,\"field\":\"op\"},{\"type\":\"int64\",\"optional\":true,\"field\":\"ts_ms\"}],\"optional\":false,\"name\":\"exampledb.public.user_tbl.Envelope\",\"version\":1},\"payload\":{\"before\":null,\"after\":{\"name\":\"WeiLu0511_1\",\"signup_date\":16061},\"source\":{\"name\":\"exampledb\",\"ts_usec\":1494488768585609,\"txId\":1886,\"lsn\":24834940,\"snapshot\":null,\"last_snapshot_record\":null},\"op\":\"c\",\"ts_ms\":1494488768626}}";
         Converter jsonC = new JsonConverter();
         jsonC.configure(props, false);
         SchemaAndValue valueAndSchema = jsonC.toConnectData("dummy topic", Bytes.toBytes(value));
@@ -55,23 +55,29 @@ public class Test {
 
         DebePostgresEventParser p = new DebePostgresEventParser();
         Map<String, byte[]> pk = p.parseKey(record);
-        pk.entrySet().forEach(e -> System.out.println(e.getKey() + "   ---  " + Bytes.toString(e.getValue())));
+        pk.entrySet().forEach(e -> System.out.println(e.getKey() + "   --- key --->  " + Bytes.toString(e.getValue())));
 
         Map<String, byte[]> pv = p.parseValue(record);
         pv.entrySet().forEach(e -> {
             String k = e.getKey();
-            if (k.split("\\|")[1].equals("INT32")) {
-                if  (e.getValue() != null)
-                System.out.println(e.getKey() + "   ---  " + Bytes.toInt(e.getValue()));
-                else
-                    System.out.println(e.getKey() + "   ---  " + null);
+            if (k.split("\\|")[1].equals("STRING")) {
+                System.out.println(k + "  --- value --->   " + Bytes.toString(e.getValue()));
+            } else if (k.split("\\|")[1].equals("INT64")) {
+                System.out.println(k + "  --- value --->   " + Bytes.toLong(e.getValue()));
+            } else if (k.split("\\|")[1].equals("INT32")){
+                System.out.println(k + "  --- value --->   " + Bytes.toInt(e.getValue()));
             }
-            else {
-                System.out.println(e.getKey() + "   ---  " + Bytes.toString(e.getValue()));
-            }
+//            if (k.split("\\|")[1].equals("INT32")) {
+//                if  (e.getValue() != null)
+//                System.out.println(e.getKey() + "   ---  " + Bytes.toInt(e.getValue()));
+//                else
+//                    System.out.println(e.getKey() + "   ---  " + null);
+//            }
+//            else {
+//                System.out.println(e.getKey() + "   ---  " + Bytes.toString(e.getValue()));
+//            }
         });
     }
-
 
 
 }

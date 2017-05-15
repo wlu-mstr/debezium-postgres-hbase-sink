@@ -2,6 +2,7 @@ package com.hon.saas.hbase.parser;
 
 import com.google.common.collect.Maps;
 import com.hon.saas.hbase.debezium.Constant;
+import com.hon.saas.hbase.debezium.DecoderBufsMessage;
 import org.apache.commons.math3.util.Pair;
 import org.apache.kafka.connect.data.Field;
 import org.apache.kafka.connect.data.Schema;
@@ -23,9 +24,6 @@ public class DebePostgresEventParser implements EventParser {
         return FieldParser.parsePrimitiveFields(keySchema, key);
     }
 
-
-
-
     private Optional<Field> findField(List<Field> fields, String fieldName) {
         return fields.stream().filter(f -> f.name().equals(fieldName)).findAny();
     }
@@ -36,14 +34,13 @@ public class DebePostgresEventParser implements EventParser {
         Struct value = (Struct) record.value();
         List<Field> fields = valueSchema.fields();
 
-        Map<String, byte[]> map = Maps.newHashMap();
-
+        DecoderBufsMessage message = new DecoderBufsMessage();
         // op=c/d/r/u
         Optional<Field> oP = findField(fields, Constant.OP);
         if (oP.isPresent()) {
             Object opValue = value.get(oP.get());
             Pair<String, byte[]> p = FieldParser.parsePrimitiveField(oP.get(), opValue);
-            map.put(p.getFirst(), p.getSecond());
+            message.setOpString(p.getSecond());
         }
 
         // before record
@@ -51,7 +48,7 @@ public class DebePostgresEventParser implements EventParser {
         if (before.isPresent()) {
             Struct beforeValue = (Struct) value.get(before.get());
             Map<String, byte[]> beforeMap = FieldParser.parsePrimitiveFields(before.get().schema(), beforeValue);
-            map.putAll(beforeMap);
+            message.getBefore().putAll(beforeMap);
         }
 
         // after record
@@ -59,8 +56,17 @@ public class DebePostgresEventParser implements EventParser {
         if (after.isPresent()) {
             Struct afterValue = (Struct) value.get(after.get());
             Map<String, byte[]> afterMap = FieldParser.parsePrimitiveFields(after.get().schema(), afterValue);
-            map.putAll(afterMap);
+            message.getAfter().putAll(afterMap);
         }
-        return map;
+
+        // timestamp
+        Optional<Field> tsMs = findField(fields, Constant.TS_MS);
+        if (tsMs.isPresent()) {
+            Object tsValue = value.get(tsMs.get());
+            Pair<String, byte[]> p = FieldParser.parsePrimitiveField(tsMs.get(), tsValue);
+            message.setTsMsLong(p.getSecond());
+        }
+
+        return message.valueMap();
     }
 }
