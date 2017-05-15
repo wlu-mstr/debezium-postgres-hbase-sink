@@ -9,6 +9,7 @@ import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.sink.SinkRecord;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,6 +32,9 @@ public class DebePostgresEventParser implements EventParser {
     @Override
     public Map<String, byte[]> parseValue(SinkRecord record) throws EventParsingException {
         Schema valueSchema = record.valueSchema();
+        if (valueSchema == null) { // a dummy message after a delete message
+            return new HashMap<>();
+        }
         Struct value = (Struct) record.value();
         List<Field> fields = valueSchema.fields();
 

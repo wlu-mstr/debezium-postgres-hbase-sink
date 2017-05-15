@@ -61,11 +61,11 @@ public class ToPutFunction implements Function<SinkRecord, Put> {
         final Map<String, byte[]> valuesMap  = this.eventParser.parseValue(sinkRecord);
         final Map<String, byte[]> keysMap = this.eventParser.parseKey(sinkRecord);
 
-        keysMap.entrySet().stream().forEach( e -> {
+        keysMap.entrySet().forEach(e -> {
             System.out.println(e.getKey() + "  key ---   " + Bytes.toString(e.getValue()));
         });
 
-        valuesMap.entrySet().stream().forEach( e -> {
+        valuesMap.entrySet().forEach(e -> {
             System.out.println(e.getKey() + "  value ---   " + Bytes.toString(e.getValue()));
         });
 
@@ -78,7 +78,7 @@ public class ToPutFunction implements Function<SinkRecord, Put> {
         final byte[] rowkey = toRowKey(valuesMap, rowkeyColumns, delimiter);
 
         final Put put = new Put(rowkey);
-        valuesMap.entrySet().stream().forEach(entry -> {
+        valuesMap.entrySet().forEach(entry -> {
             final String qualifier = entry.getKey();
             final byte[] value = entry.getValue();
             put.addColumn(Bytes.toBytes(columnFamily), Bytes.toBytes(qualifier), value);
